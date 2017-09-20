@@ -73,7 +73,6 @@ class KanbanContainer extends Component{
 
   toggleTask=(cardId, taskId, taskIndex)=>{
     let cardIndex = this.state.cards.findIndex((card)=>card.id === cardId);
-
     let newDoneValue ;
     let nextState = update(this.state.cards,{
       [cardIndex] : {
@@ -93,8 +92,32 @@ class KanbanContainer extends Component{
       headers:API_HEADERS,
       body: JSON.stringify({done:newDoneValue})
     })
+  };
 
+  updateCardStatus=(carId, listId)=>{
+    let cardIndex = this.state.cards.findIndex((card)=>card.id === carId);
+    let card = this.state.cards[cardIndex];
+    if(card.status !== listId){
+      this.setState(update(this.state,{
+        cards:{
+          status:{$set:listId}
+        }
+      }))
+    }
+  };
 
+  updateCarPosition = (cardId, afterId)=>{
+    if(cardId !== afterId){
+      let cardIndex = this.state.cards.findIndex((card)=>(card.id === cardId)) ;
+      let card = this.state.cards[cardIndex];
+      let afterIndex = this.state.cards.findIndex((card)=>(card.id === afterId)) ;
+      this.setState(update(this.state,{
+        cards:[
+          [cardIndex, 1],
+          [afterIndex,0,card]
+        ]
+      }))
+    }
   };
 
   render(){
@@ -105,6 +128,10 @@ class KanbanContainer extends Component{
                      delete: this.deleteTask,
                      add: this.addTask
                    }}
+        cardCallbacks={{
+          updateStatus:this.updateCardStatus,
+          updatePosition:this.updateCarPosition
+        }}
       />
     )
   }
